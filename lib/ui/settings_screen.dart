@@ -72,25 +72,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
 
           ListTile(
-            title: const Text('Save backup to Downloads'),
-            subtitle: const Text(
-              'Creates a backup file in your Downloads folder',
-            ),
-            trailing: const Icon(Icons.download),
+            title: const Text('Download Backup'),
+            subtitle: const Text('Save a backup to your device storage'),
+            trailing: const Icon(Icons.save_alt),
             onTap: () async {
               try {
-                final file = await _backupService.exportToDownloads();
+                final file = await _backupService.exportToDocuments();
                 if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Backup saved to Downloads: ${file.path}'),
+                    content: Text('Backup saved to: ${p.dirname(file.path)}'),
+                    duration: const Duration(seconds: 4),
+                    action: SnackBarAction(label: 'OK', onPressed: () {}),
                   ),
                 );
               } catch (e) {
                 if (!context.mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Export to Downloads failed: $e')),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text('Backup failed: $e')));
               }
             },
           ),

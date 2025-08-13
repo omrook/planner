@@ -22,13 +22,21 @@ class BackupService {
 
   Future<String> get backupPath async {
     if (!kIsWeb) {
-      // Try external storage directory first (more reliable on Android)
+      if (Platform.isAndroid) {
+        // Get the Android Download directory
+        final downloadPath = '/storage/emulated/0/Download';
+        final dir = Directory(downloadPath);
+        if (await dir.exists()) {
+          return '$downloadPath/planner_backup.json';
+        }
+      }
+
       try {
+        // Try external storage as fallback
         final dir = await getExternalStorageDirectory();
         if (dir != null) {
-          final backupDir = Directory('${dir.path}/Backups');
-          await backupDir.create(recursive: true);
-          return '${backupDir.path}/planner_backup.json';
+          final downloadPath = dir.path.split('Android')[0] + 'Download';
+          return '$downloadPath/planner_backup.json';
         }
       } catch (e) {
         debugPrint('External storage not available: $e');
@@ -37,9 +45,7 @@ class BackupService {
 
     // Fallback to application documents directory
     final dir = await getApplicationDocumentsDirectory();
-    final backupDir = Directory('${dir.path}/Backups');
-    await backupDir.create(recursive: true);
-    return '${backupDir.path}/planner_backup.json';
+    return '${dir.path}/planner_backup.json';
   }
 
   Future<String> generateBackupFilename() async {
@@ -60,23 +66,23 @@ class BackupService {
   }
 
   Future<String> get backupDirectoryPath async {
-    if (!kIsWeb) {
-      try {
-        final dir = await getExternalStorageDirectory();
-        if (dir != null) {
-          final backupDir = Directory('${dir.path}/Backups');
-          await backupDir.create(recursive: true);
-          return backupDir.path;
-        }
-      } catch (e) {
-        debugPrint('External storage not available: $e');
-      }
+    if (!kIsWeb && Platform.isAndroid) {
+      // Use the Android Download directory
+      return '/storage/emulated/0/Download';
     }
 
+    try {
+      final dir = await getDownloadsDirectory();
+      if (dir != null) {
+        return dir.path;
+      }
+    } catch (e) {
+      debugPrint('Downloads directory not available: $e');
+    }
+
+    // Fallback to application documents directory
     final dir = await getApplicationDocumentsDirectory();
-    final backupDir = Directory('${dir.path}/Backups');
-    await backupDir.create(recursive: true);
-    return backupDir.path;
+    return dir.path;
   }
 
   Future<List<FileSystemEntity>> listBackups() async {
@@ -107,14 +113,28 @@ class BackupService {
 
   Future<File> exportToDownloads() async {
     try {
-      final dir = await getDownloadsDirectory();
-      if (dir == null) {
-        throw Exception('Could not access Downloads directory');
+      String downloadPath;
+      if (Platform.isAndroid) {
+        // Use the Android Download directory
+        downloadPath = '/storage/emulated/0/Download';
+      } else {
+        final dir = await getDownloadsDirectory();
+        if (dir == null) {
+          throw Exception('Could not access Downloads directory');
+        }
+        downloadPath = dir.path;
       }
+
       final filename = await generateBackupFilename();
-      final file = File('${dir.path}/$filename');
+      final file = File('$downloadPath/$filename');
       final data = await _buildBackupJson();
       await file.writeAsString(jsonEncode(data));
+
+      // Update last backup time in settings
+      final settings = settingsBox.get('app') ?? AppSettings();
+      settings.lastBackupAt = DateTime.now();
+      await settingsBox.put('app', settings);
+
       return file;
     } catch (e) {
       debugPrint('Export to downloads failed: $e');
