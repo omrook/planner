@@ -74,9 +74,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     );
                   } catch (e) {
                     if (!context.mounted) return;
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Export failed: $e')),
+                    );
                   }
                 },
               ),
@@ -90,7 +90,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Backup saved to Downloads: ${file.path}'),
+                        content: Text(
+                          'Backup saved to Downloads: ${file.path}',
+                        ),
                       ),
                     );
                   } catch (e) {
@@ -119,14 +121,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Restored from latest backup successfully'),
+                        content: Text(
+                          'Restored from latest backup successfully',
+                        ),
                       ),
                     );
                   } catch (e) {
                     if (!context.mounted) return;
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Restore failed: $e')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Restore failed: $e')),
+                    );
                   }
                 },
               ),
@@ -145,13 +149,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     await _backupService.importFromFilePath(file.path);
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Imported backup successfully')),
+                      const SnackBar(
+                        content: Text('Imported backup successfully'),
+                      ),
                     );
                   } catch (e) {
                     if (!context.mounted) return;
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Import failed: $e')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Import failed: $e')),
+                    );
                   }
                 },
               ),
@@ -193,7 +199,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   return Column(
                     children: backups.map((backup) {
                       final file = backup as File;
-                      final fileName = file.path.split(Platform.pathSeparator).last;
+                      final fileName = file.path
+                          .split(Platform.pathSeparator)
+                          .last;
                       final modified = file.statSync().modified;
                       return ListTile(
                         leading: const Icon(Icons.description),
@@ -246,13 +254,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   if (!context.mounted) return;
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('Backup restored successfully'),
+                                      content: Text(
+                                        'Backup restored successfully',
+                                      ),
                                     ),
                                   );
                                 } catch (e) {
                                   if (!context.mounted) return;
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Restore failed: $e')),
+                                    SnackBar(
+                                      content: Text('Restore failed: $e'),
+                                    ),
                                   );
                                 }
                               },
