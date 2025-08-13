@@ -7,6 +7,7 @@ import 'models/app_settings.dart';
 import 'models/planner_tab.dart';
 import 'models/task.dart';
 import 'providers/app_provider.dart';
+import 'providers/theme_provider.dart';
 import 'ui/home_screen.dart';
 import 'services/backup_service.dart';
 
@@ -32,24 +33,36 @@ Future<void> main() async {
     settingsBox: settingsBox,
   ).maybeAutoBackup();
 
-  runApp(MyApp(appProvider: appProvider));
+  // Initialize theme provider
+  final themeProvider = ThemeProvider();
+  await themeProvider.init();
+
+  runApp(MyApp(appProvider: appProvider, themeProvider: themeProvider));
 }
 
 class MyApp extends StatelessWidget {
   final AppProvider appProvider;
-  const MyApp({super.key, required this.appProvider});
+  final ThemeProvider themeProvider;
+  
+  const MyApp({
+    super.key, 
+    required this.appProvider,
+    required this.themeProvider,
+  });
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ChangeNotifierProvider.value(value: appProvider)],
-      child: MaterialApp(
-        title: 'Planner',
-        theme: ThemeData(
-          useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.teal),
+      providers: [
+        ChangeNotifierProvider.value(value: appProvider),
+        ChangeNotifierProvider.value(value: themeProvider),
+      ],
+      child: Consumer<ThemeProvider>(
+        builder: (context, theme, _) => MaterialApp(
+          title: 'Planner',
+          theme: theme.getTheme(),
+          home: const HomeScreen(),
         ),
-        home: const HomeScreen(),
       ),
     );
   }

@@ -12,11 +12,14 @@ class AppSettings {
   String? lastTabId; // persist last selected tab id
   @HiveField(3)
   bool sortByDateDesc; // true = newest first, false = oldest first
+  @HiveField(4)
+  int themeColor; // store theme color as int value
 
   AppSettings({
     this.autoBackup = 'none',
     this.lastBackupAt,
     this.lastTabId,
     this.sortByDateDesc = true,
+    this.themeColor = 0xFF2196F3, // default blue color
   });
 }

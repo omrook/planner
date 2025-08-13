@@ -21,13 +21,14 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       lastBackupAt: fields[1] as DateTime?,
       lastTabId: fields[2] as String?,
       sortByDateDesc: fields[3] as bool,
+      themeColor: fields[4] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, AppSettings obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.autoBackup)
       ..writeByte(1)
@@ -35,7 +36,9 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       ..writeByte(2)
       ..write(obj.lastTabId)
       ..writeByte(3)
-      ..write(obj.sortByDateDesc);
+      ..write(obj.sortByDateDesc)
+      ..writeByte(4)
+      ..write(obj.themeColor);
   }
 
   @override

@@ -1,13 +1,16 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:hive/hive.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
 
 import '../data/hive_boxes.dart';
 import '../models/app_settings.dart';
 import '../models/planner_tab.dart';
 import '../models/task.dart';
+import '../providers/theme_provider.dart';
 import '../services/backup_service.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -44,10 +47,64 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
       body: ListView(
         children: [
+          // Theme Color Section
+          ExpansionTile(
+            leading: Container(
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: themeProvider.themeColor,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Theme.of(context).colorScheme.outline,
+                  width: 1,
+                ),
+              ),
+            ),
+            title: const Text('App Theme'),
+            subtitle: const Text('Customize app appearance'),
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Choose a color to customize the app\'s appearance',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxHeight: MediaQuery.of(context).size.height * 0.5,
+                      ),
+                      child: SingleChildScrollView(
+                        child: ColorPicker(
+                          pickerColor: themeProvider.themeColor,
+                          onColorChanged: (color) => themeProvider.updateThemeColor(color),
+                          pickerAreaHeightPercent: 0.7,
+                          enableAlpha: false,
+                          displayThumbColor: true,
+                          portraitOnly: true,
+                          hexInputBar: true,
+                          labelTypes: const [],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
           // Backup Operations Section
           ExpansionTile(
             initiallyExpanded: true,
