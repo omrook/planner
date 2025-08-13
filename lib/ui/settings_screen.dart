@@ -45,16 +45,68 @@ class _SettingsScreenState extends State<SettingsScreen> {
     setState(() {});
   }
 
+  Widget _buildSettingsSection({
+    required BuildContext context,
+    required Widget leading,
+    required String title,
+    required String subtitle,
+    required List<Widget> children,
+    required ThemeProvider themeProvider,
+  }) {
+    final theme = Theme.of(context);
+    final themeColor = themeProvider.themeColor;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: themeColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: themeColor.withOpacity(0.3), width: 1),
+      ),
+      child: Theme(
+        data: Theme.of(context).copyWith(
+          dividerColor: Colors.transparent,
+          listTileTheme: theme.listTileTheme.copyWith(iconColor: themeColor),
+        ),
+        child: ExpansionTile(
+          title: Text(title),
+          subtitle: Text(subtitle),
+          leading: leading,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          children: [
+            Container(
+              margin: const EdgeInsets.fromLTRB(8, 0, 8, 8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: Colors.grey.withOpacity(0.2),
+                  width: 1,
+                ),
+              ),
+              child: Column(children: children),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    
+
     return Scaffold(
       appBar: AppBar(title: const Text('Settings')),
       body: ListView(
+        padding: const EdgeInsets.symmetric(vertical: 8),
         children: [
           // Theme Color Section
-          ExpansionTile(
+          _buildSettingsSection(
+            context: context,
+            themeProvider: themeProvider,
             leading: Container(
               width: 24,
               height: 24,
@@ -67,8 +119,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 ),
               ),
             ),
-            title: const Text('App Theme'),
-            subtitle: const Text('Customize app appearance'),
+            title: 'App Theme',
+            subtitle: 'Customize app appearance',
             children: [
               Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -77,10 +129,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   children: [
                     const Text(
                       'Choose a color to customize the app\'s appearance',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                     const SizedBox(height: 16),
                     ConstrainedBox(
@@ -90,7 +139,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: SingleChildScrollView(
                         child: ColorPicker(
                           pickerColor: themeProvider.themeColor,
-                          onColorChanged: (color) => themeProvider.updateThemeColor(color),
+                          onColorChanged: (color) =>
+                              themeProvider.updateThemeColor(color),
                           pickerAreaHeightPercent: 0.7,
                           enableAlpha: false,
                           displayThumbColor: true,
@@ -106,11 +156,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ],
           ),
           // Backup Operations Section
-          ExpansionTile(
-            initiallyExpanded: true,
+          _buildSettingsSection(
+            context: context,
+            themeProvider: themeProvider,
             leading: const Icon(Icons.backup),
-            title: const Text('Backup Operations'),
-            subtitle: const Text('Create or restore backups'),
+            title: 'Backup Operations',
+            subtitle: 'Create or restore backups',
             children: [
               ListTile(
                 title: const Text('Create backup'),
@@ -131,9 +182,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     );
                   } catch (e) {
                     if (!context.mounted) return;
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Export failed: $e')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Export failed: $e')),
+                    );
                   }
                 },
               ),
@@ -147,7 +198,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Backup saved to Downloads: ${file.path}'),
+                        content: Text(
+                          'Backup saved to Downloads: ${file.path}',
+                        ),
                       ),
                     );
                   } catch (e) {
@@ -176,14 +229,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                        content: Text('Restored from latest backup successfully'),
+                        content: Text(
+                          'Restored from latest backup successfully',
+                        ),
                       ),
                     );
                   } catch (e) {
                     if (!context.mounted) return;
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Restore failed: $e')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Restore failed: $e')),
+                    );
                   }
                 },
               ),
@@ -202,13 +257,15 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     await _backupService.importFromFilePath(file.path);
                     if (!context.mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Imported backup successfully')),
+                      const SnackBar(
+                        content: Text('Imported backup successfully'),
+                      ),
                     );
                   } catch (e) {
                     if (!context.mounted) return;
-                    ScaffoldMessenger.of(
-                      context,
-                    ).showSnackBar(SnackBar(content: Text('Import failed: $e')));
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Import failed: $e')),
+                    );
                   }
                 },
               ),
@@ -216,10 +273,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
 
           // Backup History Section
-          ExpansionTile(
+          _buildSettingsSection(
+            context: context,
+            themeProvider: themeProvider,
             leading: const Icon(Icons.history),
-            title: const Text('Backup History'),
-            subtitle: const Text('View and manage existing backups'),
+            title: 'Backup History',
+            subtitle: 'View and manage existing backups',
             children: [
               FutureBuilder<List<FileSystemEntity>>(
                 future: _backupService.listBackups(),
@@ -250,7 +309,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   return Column(
                     children: backups.map((backup) {
                       final file = backup as File;
-                      final fileName = file.path.split(Platform.pathSeparator).last;
+                      final fileName = file.path
+                          .split(Platform.pathSeparator)
+                          .last;
                       final modified = file.statSync().modified;
                       return ListTile(
                         leading: const Icon(Icons.description),
@@ -303,13 +364,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   if (!context.mounted) return;
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     const SnackBar(
-                                      content: Text('Backup restored successfully'),
+                                      content: Text(
+                                        'Backup restored successfully',
+                                      ),
                                     ),
                                   );
                                 } catch (e) {
                                   if (!context.mounted) return;
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Restore failed: $e')),
+                                    SnackBar(
+                                      content: Text('Restore failed: $e'),
+                                    ),
                                   );
                                 }
                               },
